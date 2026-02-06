@@ -25,6 +25,7 @@ public class SceneManager : MonoBehaviour
     public void OnTransitionComplete()
     {
         bgBack.sprite = bgFront.sprite; //将要切换的图传递给背景
+        animator.Play("Idle"); //回到Idle状态
         isSwitching = false;
         Debug.Log("[SceneManager]:场景图片切换完成");
     }

@@ -23,14 +23,14 @@ public class GameDirector : MonoBehaviour
 
     [Header("组件")]
     public UIManager uiManager;
-    [SerializeField] private SceneManager sceneManager;
+    public SceneManager sceneManager;
 
     [Header("命令列表")]
     private List<GameCommand> commands = new List<GameCommand>();
 
     [Header("参数")]
-    private int commadIndex = 0; //程序计数器
-    private bool playerClicked = false; //点击信号
+    [SerializeField] private int commadIndex = 0; //程序计数器
+    [SerializeField] private bool playerClicked = false; //点击信号
 
     private void Start()
     {
@@ -48,7 +48,13 @@ public class GameDirector : MonoBehaviour
 
         commands.Add(new Cmd_ShowText { characterName = "老师", dialogueContent = "那位同学，站住。" });
 
-        commands.Add(new Cmd_DebugLog { message = "=== 演示结束 ===" });
+        commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "我在学校门口。" });
+
+        // 触发切换：换成 B 图
+        // 因为是非阻塞，这行执行完瞬间会执行下一行
+        commands.Add(new Cmd_ChangeScene { imageName = "Textures/Backgrounds/街_通学路B" });
+
+        commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "背景应该正在慢慢变成 B 图..." });
 
         StartCoroutine(ExecuteLoop());
     }
