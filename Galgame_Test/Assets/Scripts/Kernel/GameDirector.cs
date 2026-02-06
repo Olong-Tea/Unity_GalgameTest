@@ -23,6 +23,7 @@ public class GameDirector : MonoBehaviour
 
     [Header("组件")]
     public UIManager uiManager;
+    [SerializeField] private SceneManager sceneManager;
 
     [Header("命令列表")]
     private List<GameCommand> commands = new List<GameCommand>();
