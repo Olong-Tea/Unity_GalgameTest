@@ -59,7 +59,7 @@ public class UIManager : MonoBehaviour
             {
                 bodyText.maxVisibleCharacters = total;
                 isCompeleted = true;
-                Debug.Log("已跳过打印当前文本");
+                Debug.Log("[UIManager]:已跳过打印当前文本");
                 yield break;
             }
             else

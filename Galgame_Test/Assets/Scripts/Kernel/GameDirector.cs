@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GameDirector : MonoBehaviour
 {
+    #region 单例实现
     /// <summary>
     /// GD的单例模式
     /// </summary>
@@ -20,10 +21,12 @@ public class GameDirector : MonoBehaviour
             Instance = this;
         }
     }
+    #endregion
 
     [Header("组件")]
     public UIManager uiManager;
     public SceneManager sceneManager;
+    public CharacterManager characterManager;
 
     [Header("命令列表")]
     private List<GameCommand> commands = new List<GameCommand>();
@@ -52,9 +55,31 @@ public class GameDirector : MonoBehaviour
 
         // 触发切换：换成 B 图
         // 因为是非阻塞，这行执行完瞬间会执行下一行
-        commands.Add(new Cmd_ChangeScene { imageName = "Textures/Backgrounds/街_通学路B" });
+        commands.Add(new Cmd_ChangeScene { imageName = "Textures/Backgrounds/街_通学路C" });
 
         commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "背景应该正在慢慢变成 B 图..." });
+
+        commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "这时，一个人影走了过来。" });
+
+        // 【新增】中间出现立绘
+        commands.Add(new Cmd_Character
+        {
+            characterName = "Textures/Characters/茉子a_0_1892",
+            position = "Center",
+            isShow = true
+        });
+
+        commands.Add(new Cmd_ShowText { characterName = "神秘少女", dialogueContent = "你好，初次见面。" });
+
+        // 【新增】立绘消失
+        commands.Add(new Cmd_Character
+        {
+            characterName = "Textures/Characters/茉子a_0_1892",
+            position = "Center",
+            isShow = false
+        });
+
+        commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "她转身离开了。" });
 
         StartCoroutine(ExecuteLoop());
     }
