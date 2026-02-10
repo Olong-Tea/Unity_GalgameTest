@@ -1,0 +1,8 @@
+ID,Speaker,Text,Command,Parameter
+1,旁白,(空),BG,School_Gate
+2,小明,这里的风景真好啊。,,
+3,小明,(空),CHAR,"Girl_A,Center,true"
+4,少女,你是新来的吗？,,
+5,小明,是的，请多关照。,,
+6,,(空),CHAR,"Girl_A,Center,false"
+7,旁白,少女离开了。,,

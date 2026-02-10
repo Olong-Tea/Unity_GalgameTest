@@ -27,6 +27,7 @@ public class GameDirector : MonoBehaviour
     public UIManager uiManager;
     public SceneManager sceneManager;
     public CharacterManager characterManager;
+    public ChapterAsset currentChapter;
 
     [Header("命令列表")]
     private List<GameCommand> commands = new List<GameCommand>();
@@ -37,51 +38,109 @@ public class GameDirector : MonoBehaviour
 
     private void Start()
     {
-        //存入测试数据
-        commands.Add(new Cmd_DebugLog { message = "=== 游戏开始 ===" });
+        #region 测试数据
+        ////存入测试数据
+        //commands.Add(new Cmd_DebugLog { message = "=== 游戏开始 ===" });
 
-        // 第一句：不需要等待点击，直接显示（通常用于独白或画外音）
-        // 注意：如果我们想让它等待，IsBlocking 必须是 true。
-        commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "这是一个明媚的早晨。" });
+        //// 第一句：不需要等待点击，直接显示（通常用于独白或画外音）
+        //// 注意：如果我们想让它等待，IsBlocking 必须是 true。
+        //commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "这是一个明媚的早晨。" });
 
-        // 这里其实有一个逻辑点：Cmd_ShowText 本身是阻塞的 (IsBlocking=true)。
-        // 所以执行完上一句，CPU 会自动停下，等待点击。
+        //// 这里其实有一个逻辑点：Cmd_ShowText 本身是阻塞的 (IsBlocking=true)。
+        //// 所以执行完上一句，CPU 会自动停下，等待点击。
 
-        commands.Add(new Cmd_ShowText { characterName = "小明", dialogueContent = "哎呀！要迟到了！" });
+        //commands.Add(new Cmd_ShowText { characterName = "小明", dialogueContent = "哎呀！要迟到了！" });
 
-        commands.Add(new Cmd_ShowText { characterName = "老师", dialogueContent = "那位同学，站住。" });
+        //commands.Add(new Cmd_ShowText { characterName = "老师", dialogueContent = "那位同学，站住。" });
 
-        commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "我在学校门口。" });
+        //commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "我在学校门口。" });
 
-        // 触发切换：换成 B 图
-        // 因为是非阻塞，这行执行完瞬间会执行下一行
-        commands.Add(new Cmd_ChangeScene { imageName = "Textures/Backgrounds/街_通学路C" });
+        //// 触发切换：换成 B 图
+        //// 因为是非阻塞，这行执行完瞬间会执行下一行
+        //commands.Add(new Cmd_ChangeScene { imageName = "Textures/Backgrounds/街_通学路C" });
 
-        commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "背景应该正在慢慢变成 B 图..." });
+        //commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "背景应该正在慢慢变成 B 图..." });
 
-        commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "这时，一个人影走了过来。" });
+        //commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "这时，一个人影走了过来。" });
 
-        // 【新增】中间出现立绘
-        commands.Add(new Cmd_Character
-        {
-            characterName = "Textures/Characters/茉子a_0_1892",
-            position = "Center",
-            isShow = true
-        });
+        //// 【新增】中间出现立绘
+        //commands.Add(new Cmd_Character
+        //{
+        //    characterName = "Textures/Characters/茉子a_0_1892",
+        //    position = "Center",
+        //    isShow = true
+        //});
 
-        commands.Add(new Cmd_ShowText { characterName = "神秘少女", dialogueContent = "你好，初次见面。" });
+        //commands.Add(new Cmd_ShowText { characterName = "神秘少女", dialogueContent = "你好，初次见面。" });
 
-        // 【新增】立绘消失
-        commands.Add(new Cmd_Character
-        {
-            characterName = "Textures/Characters/茉子a_0_1892",
-            position = "Center",
-            isShow = false
-        });
+        //// 【新增】立绘消失
+        //commands.Add(new Cmd_Character
+        //{
+        //    characterName = "Textures/Characters/茉子a_0_1892",
+        //    position = "Center",
+        //    isShow = false
+        //});
 
-        commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "她转身离开了。" });
+        //commands.Add(new Cmd_ShowText { characterName = "旁白", dialogueContent = "她转身离开了。" });
+        #endregion
+
+        BuildCommands();
 
         StartCoroutine(ExecuteLoop());
+    }
+
+    public void BuildCommands()
+    {
+        commands.Clear();
+
+        if(currentChapter == null)
+        {
+            Debug.LogError("没有指定ChapterAsset！");
+            return; 
+        }
+
+        foreach (var line in currentChapter.scenarioLines)
+        {
+            if (!string.IsNullOrEmpty(line.command))
+            {
+                switch (line.command)
+                {
+                    case "BG":
+                        // 生成切换背景指令
+                        commands.Add(new Cmd_ChangeScene { imageName = line.parameter });
+                        break;
+
+                    case "CHAR":
+                        // 解析参数: "Girl_A,Center,true"
+                        string[] paramsArr = line.parameter.Split('|'); // 假设 CSV 里参数用 | 分隔
+                        if (paramsArr.Length >= 3)
+                        {
+                            commands.Add(new Cmd_Character
+                            {
+                                characterName = paramsArr[0],
+                                position = paramsArr[1],
+                                isShow = bool.Parse(paramsArr[2])
+                            });
+                        }
+                        break;
+
+                    case "WAIT":
+                        commands.Add(new Cmd_WaitClick()); // 简化版
+                        break;
+                }
+                // B. 再处理对话 (Text)
+                // 如果这一行有台词，就生成 ShowText 指令
+                if (!string.IsNullOrEmpty(line.text))
+                {
+                    commands.Add(new Cmd_ShowText
+                    {
+                        characterName = line.speaker,
+                        dialogueContent = line.text
+                    });
+                }
+                Debug.Log($"剧本装载完成，共生成 {commands.Count} 条指令。");
+            }
+        }
     }
 
     /// <summary>
